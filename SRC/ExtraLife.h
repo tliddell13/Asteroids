@@ -1,13 +1,13 @@
-#ifndef __ASTEROID_H__
-#define __ASTEROID_H__
+#ifndef __EXTTRALIFE_H__
+#define __EXTRALIFE_H__
 
 #include "GameObject.h"
 
-class Asteroid : public GameObject
+class ExtraLife : public GameObject
 {
 public:
-	Asteroid(void);
-	~Asteroid(void);
+	ExtraLife(void);
+	~ExtraLife(void);
 
 	bool CollisionTest(shared_ptr<GameObject> o);
 	void OnCollision(const GameObjectList& objects);

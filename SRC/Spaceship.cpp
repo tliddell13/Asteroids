@@ -94,6 +94,7 @@ void Spaceship::Shoot(void)
 
 bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
 {
+	// Check if the object collided with is a powerup
 	if (o->GetType() != GameObjectType("Asteroid")) return false;
 	if (mBoundingShape.get() == NULL) return false;
 	if (o->GetBoundingShape().get() == NULL) return false;
@@ -104,3 +105,5 @@ void Spaceship::OnCollision(const GameObjectList &objects)
 {
 	mWorld->FlagForRemoval(GetThisPtr());
 }
+
+// These functions handle the collisions that happen between the spaceship and the powerups

@@ -1,13 +1,13 @@
-#ifndef __ASTEROID_H__
-#define __ASTEROID_H__
+#ifndef __POINTBONUS_H__
+#define __POINTBONUS_H__
 
 #include "GameObject.h"
 
-class Asteroid : public GameObject
+class PointBonus : public GameObject
 {
 public:
-	Asteroid(void);
-	~Asteroid(void);
+	PointBonus(void);
+	~PointBonus(void);
 
 	bool CollisionTest(shared_ptr<GameObject> o);
 	void OnCollision(const GameObjectList& objects);

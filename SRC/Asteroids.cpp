@@ -1,4 +1,6 @@
 #include "Asteroid.h"
+#include "PointBonus.h"
+#include "ExtraLife.h"
 #include "Asteroids.h"
 #include "Animation.h"
 #include "AnimationManager.h"
@@ -57,11 +59,15 @@ void Asteroids::Start()
 	Animation *explosion_anim = AnimationManager::GetInstance().CreateAnimationFromFile("explosion", 64, 1024, 64, 64, "explosion_fs.png");
 	Animation *asteroid1_anim = AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
 	Animation *spaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
-
+	Animation *points_anim = AnimationManager::GetInstance().CreateAnimationFromFile("points", 128, 128, 128, 128, "points_fs.png");
 	// Create a spaceship and add it to the world
 	mGameWorld->AddObject(CreateSpaceship());
 	// Create some asteroids and add them to the world
 	CreateAsteroids(5);
+
+	// Spawn the powerups 
+	//SpawnPowerups();
+	SetTimer(1000, CREATE_POWERUP);
 
 	//Create the GUI
 	CreateGUI();
@@ -141,10 +147,10 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 		explosion->SetRotation(object->GetRotation());
 		mGameWorld->AddObject(explosion);
 		mAsteroidCount--;
-		// If the asteroid is one of the original sized asteroids split it
+		// If the asteroid is one of the original sized asteroids split it and place 3 more in the same position
 		if (object->GetScale() == 0.2f) {
 			SplitAsteroids(3, object->GetPosition());
-			mAsteroidCount += 2;
+			mAsteroidCount += 3;
 		}
 		if (mAsteroidCount <= 0) 
 		{ 
@@ -173,6 +179,20 @@ void Asteroids::OnTimer(int value)
 	if (value == SHOW_GAME_OVER)
 	{
 		mGameOverLabel->SetVisible(true);
+	}
+	// Have a value for the spawning the powerup here
+	if (value == CREATE_POWERUP)
+	{
+		// The powerup is chosen using a random number between 1 and 5
+		shared_ptr<GameObject> pointBonus = make_shared<PointBonus>();
+		pointBonus->SetBoundingShape(make_shared<BoundingSphere>(pointBonus->GetThisPtr(), 4.0f));
+		Animation* anim_ptr = AnimationManager::GetInstance().GetAnimationByName("points");
+		shared_ptr<Sprite> points_sprite
+			= make_shared<Sprite>(anim_ptr->GetWidth(), anim_ptr->GetHeight(), anim_ptr);
+		pointBonus->SetSprite(points_sprite);
+		pointBonus->SetScale(0.07f);
+		mGameWorld->AddObject(pointBonus);
+
 	}
 
 }
@@ -232,6 +252,15 @@ void Asteroids::SplitAsteroids(const uint num_asteroids, GLVector3f pos)
 		asteroid->SetPosition(pos);
 		mGameWorld->AddObject(asteroid);
 	}
+}
+
+void Asteroids::SpawnPowerups() {
+	// Seed the random number gen
+	srand(time(NULL));
+	// Pick random times to spawn three powerups in between the times of 5 seconds and 60 seconds
+	int randomTime1 = rand() % 55001 + 5000;
+	int randomTime2 = rand() % 55001 + 5000;
+	int randomTime3 = rand() % 55001 + 5000;
 }
 
 void Asteroids::CreateGUI()
