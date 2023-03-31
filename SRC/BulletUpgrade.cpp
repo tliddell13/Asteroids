@@ -1,10 +1,10 @@
 #include <stdlib.h>
 #include "GameUtil.h"
-#include "PointBonus.h"
+#include "BulletUpgrade.h"
 #include "BoundingShape.h"
 
 // Change random position to not spawn where the player is at
-PointBonus::PointBonus(void) : GameObject("PointBonus")
+BulletUpgrade::BulletUpgrade(void) : GameObject("BulletUpgrade")
 {
 	mAngle = rand() % 360;
 	mRotation = 0; // rand() % 90;
@@ -16,23 +16,23 @@ PointBonus::PointBonus(void) : GameObject("PointBonus")
 	mVelocity.z = 0.0;
 }
 
-PointBonus::~PointBonus(void)
+BulletUpgrade::~BulletUpgrade(void)
 {
 }
-// Checks for the collision of the bonus
-bool PointBonus::CollisionTest(shared_ptr<GameObject> o)
+// Checks for the collision of an asteroid
+bool BulletUpgrade::CollisionTest(shared_ptr<GameObject> o)
 {
 	if (GetType() == o->GetType()) return false;
 	if (mBoundingShape.get() == NULL) return false;
 	if (o->GetBoundingShape().get() == NULL) return false;
-	// Point bonus will ignore everything but bullets and the spaceship
+	// Bullet upgrade will ignore everything but bullets and the spaceship
 	if (o->GetType() == GameObjectType("Bullet") || o->GetType() == GameObjectType("Spaceship")) {
 		return mBoundingShape->CollisionTest(o->GetBoundingShape());
 	}
 	else return false;
 }
-// Handles the collision of the bonus
-void PointBonus::OnCollision(const GameObjectList& objects)
+// Handles the collision of an asteroid
+void BulletUpgrade::OnCollision(const GameObjectList& objects)
 {
 	mWorld->FlagForRemoval(GetThisPtr());
 }

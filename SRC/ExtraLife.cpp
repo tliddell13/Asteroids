@@ -23,11 +23,13 @@ ExtraLife::~ExtraLife(void)
 bool ExtraLife::CollisionTest(shared_ptr<GameObject> o)
 {
 	if (GetType() == o->GetType()) return false;
-	// Point bonus will ignore the asteroids
-	if (o->GetType() == GameObjectType("Asteroid")) return false;
 	if (mBoundingShape.get() == NULL) return false;
 	if (o->GetBoundingShape().get() == NULL) return false;
-	return mBoundingShape->CollisionTest(o->GetBoundingShape());
+	// Extra Life will ignore everything but bullets and the spaceship
+	if (o->GetType() == GameObjectType("Bullet") || o->GetType() == GameObjectType("Spaceship")) {
+		return mBoundingShape->CollisionTest(o->GetBoundingShape());
+	}
+	else return false;
 }
 // Handles the collision of the bonus
 void ExtraLife::OnCollision(const GameObjectList& objects)

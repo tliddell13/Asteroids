@@ -1,6 +1,7 @@
 #include "Asteroid.h"
 #include "PointBonus.h"
 #include "ExtraLife.h"
+#include "BulletUpgrade.h"
 #include "Asteroids.h"
 #include "Animation.h"
 #include "AnimationManager.h"
@@ -20,8 +21,10 @@
 Asteroids::Asteroids(int argc, char *argv[])
 	: GameSession(argc, argv)
 {
+	// Initialize variables for start of game
 	mLevel = 0;
 	mAsteroidCount = 0;
+	tripleShot = false;
 }
 
 /** Destructor. */
@@ -60,14 +63,14 @@ void Asteroids::Start()
 	Animation *asteroid1_anim = AnimationManager::GetInstance().CreateAnimationFromFile("asteroid1", 128, 8192, 128, 128, "asteroid1_fs.png");
 	Animation *spaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
 	Animation *points_anim = AnimationManager::GetInstance().CreateAnimationFromFile("points", 128, 128, 128, 128, "points_fs.png");
+	Animation *life_anim = AnimationManager::GetInstance().CreateAnimationFromFile("life", 128, 128, 128, 128, "heart_fs.png");
 	// Create a spaceship and add it to the world
 	mGameWorld->AddObject(CreateSpaceship());
 	// Create some asteroids and add them to the world
-	CreateAsteroids(5);
+	CreateAsteroids(3);
 
 	// Spawn the powerups 
-	//SpawnPowerups();
-	SetTimer(1000, CREATE_POWERUP);
+	SpawnPowerups();
 
 	//Create the GUI
 	CreateGUI();
@@ -96,7 +99,10 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 	switch (key)
 	{
 	case ' ':
-		mSpaceship->Shoot();
+		if (tripleShot) {
+			mSpaceship->TripleShot();
+		}
+		else mSpaceship->Shoot();
 		break;
 	default:
 		break;
@@ -157,6 +163,11 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 			SetTimer(500, START_NEXT_LEVEL); 
 		}
 	}
+	// If a bullet upgrade is destroyed turn on the triple shot
+	if (object->GetType() == GameObjectType("BulletUpgrade"))
+	{
+		tripleShot = true;
+	}
 }
 
 // PUBLIC INSTANCE METHODS IMPLEMENTING ITimerListener ////////////////////////
@@ -180,18 +191,45 @@ void Asteroids::OnTimer(int value)
 	{
 		mGameOverLabel->SetVisible(true);
 	}
-	// Have a value for the spawning the powerup here
+	// Spawn a powerup after a certain amount of time
 	if (value == CREATE_POWERUP)
 	{
-		// The powerup is chosen using a random number between 1 and 5
-		shared_ptr<GameObject> pointBonus = make_shared<PointBonus>();
-		pointBonus->SetBoundingShape(make_shared<BoundingSphere>(pointBonus->GetThisPtr(), 4.0f));
-		Animation* anim_ptr = AnimationManager::GetInstance().GetAnimationByName("points");
-		shared_ptr<Sprite> points_sprite
-			= make_shared<Sprite>(anim_ptr->GetWidth(), anim_ptr->GetHeight(), anim_ptr);
-		pointBonus->SetSprite(points_sprite);
-		pointBonus->SetScale(0.07f);
-		mGameWorld->AddObject(pointBonus);
+		srand(time(0));
+		int powerupChoice = rand() % 3 + 1;
+		// Spawn a point bonus
+		if (powerupChoice == 1) {
+			shared_ptr<GameObject> pointBonus = make_shared<PointBonus>();
+			pointBonus->SetBoundingShape(make_shared<BoundingSphere>(pointBonus->GetThisPtr(), 4.0f));
+			Animation* anim_ptr = AnimationManager::GetInstance().GetAnimationByName("points");
+			shared_ptr<Sprite> points_sprite
+				= make_shared<Sprite>(anim_ptr->GetWidth(), anim_ptr->GetHeight(), anim_ptr);
+			pointBonus->SetSprite(points_sprite);
+			pointBonus->SetScale(0.07f);
+			mGameWorld->AddObject(pointBonus);
+		}
+		// Spawn an extra life
+		if (powerupChoice == 2) {
+			shared_ptr<GameObject> extraLife = make_shared<ExtraLife>();
+			extraLife->SetBoundingShape(make_shared<BoundingSphere>(extraLife->GetThisPtr(), 4.0f));
+			Animation* anim_ptr2 = AnimationManager::GetInstance().GetAnimationByName("life");
+			shared_ptr<Sprite> life_sprite
+				= make_shared<Sprite>(anim_ptr2->GetWidth(), anim_ptr2->GetHeight(), anim_ptr2);
+			extraLife->SetSprite(life_sprite);
+			extraLife->SetScale(0.07f);
+			mGameWorld->AddObject(extraLife);
+		}
+		// Spawn a bullet upgrade
+		if (powerupChoice == 3) {
+			shared_ptr<GameObject> bulletUpgrade = make_shared<BulletUpgrade>();
+			bulletUpgrade->SetBoundingShape(make_shared<BoundingSphere>(bulletUpgrade->GetThisPtr(), 4.0f));
+			Animation* anim_ptr3 = AnimationManager::GetInstance().GetAnimationByName("points");
+			shared_ptr<Sprite> bullet_sprite
+				= make_shared<Sprite>(anim_ptr3->GetWidth(), anim_ptr3->GetHeight(), anim_ptr3);
+			bulletUpgrade->SetSprite(bullet_sprite);
+			bulletUpgrade->SetScale(0.07f);
+			mGameWorld->AddObject(bulletUpgrade);
+		}
+		
 
 	}
 
@@ -261,6 +299,9 @@ void Asteroids::SpawnPowerups() {
 	int randomTime1 = rand() % 55001 + 5000;
 	int randomTime2 = rand() % 55001 + 5000;
 	int randomTime3 = rand() % 55001 + 5000;
+	SetTimer(randomTime1, CREATE_POWERUP);
+	SetTimer(randomTime2, CREATE_POWERUP);
+	SetTimer(randomTime3, CREATE_POWERUP);
 }
 
 void Asteroids::CreateGUI()
@@ -307,6 +348,17 @@ void Asteroids::OnScoreChanged(int score)
 	// Get the score message as a string
 	std::string score_msg = msg_stream.str();
 	mScoreLabel->SetText(score_msg);
+}
+
+// updates the GUI when an extra life is gained
+void Asteroids::OnLivesChanged(int lives)
+{
+	// Format the score message using an string-based stream
+	std::ostringstream msg_stream;
+	msg_stream << "Lives: " << lives;
+	// Get the score message as a string
+	std::string lives_msg = msg_stream.str();
+	mLivesLabel->SetText(lives_msg);
 }
 
 void Asteroids::OnPlayerKilled(int lives_left)

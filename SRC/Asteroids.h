@@ -34,6 +34,8 @@ public:
 
 	void OnScoreChanged(int score);
 
+	void OnLivesChanged(int lives);
+
 	// Declaration of the IPlayerLister interface //////////////////////////////
 
 	void OnPlayerKilled(int lives_left);
@@ -55,6 +57,7 @@ private:
 
 	uint mLevel;
 	uint mAsteroidCount;
+	bool tripleShot;
 
 	void ResetSpaceship();
 	shared_ptr<GameObject> CreateSpaceship();

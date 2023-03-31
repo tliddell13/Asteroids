@@ -23,11 +23,13 @@ Asteroid::~Asteroid(void)
 bool Asteroid::CollisionTest(shared_ptr<GameObject> o)
 {
 	if (GetType() == o->GetType()) return false;
-	//Asteroids ignore the powerups
-	if (o->GetType() == GameObjectType("PointBonus")) return false;
 	if (mBoundingShape.get() == NULL) return false;
 	if (o->GetBoundingShape().get() == NULL) return false;
-	return mBoundingShape->CollisionTest(o->GetBoundingShape());
+	// Asteroids will ignore everything but bullets and the spaceship
+	if (o->GetType() == GameObjectType("Bullet") || o->GetType() == GameObjectType("Spaceship")) {
+		return mBoundingShape->CollisionTest(o->GetBoundingShape());
+	}
+	else return false;
 }
 // Handles the collision of an asteroid
 void Asteroid::OnCollision(const GameObjectList& objects)
