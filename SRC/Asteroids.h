@@ -54,16 +54,19 @@ private:
 	shared_ptr<GUILabel> mScoreLabel;
 	shared_ptr<GUILabel> mLivesLabel;
 	shared_ptr<GUILabel> mGameOverLabel;
+	shared_ptr<Sprite> mSpaceship_sprite;
 
 	uint mLevel;
 	uint mAsteroidCount;
 	bool tripleShot;
+	int shieldHealth;
 
 	void ResetSpaceship();
 	shared_ptr<GameObject> CreateSpaceship();
 	void CreateGUI();
 	void CreateAsteroids(const uint num_asteroids);
 	void SplitAsteroids(const uint num_asteroids, GLVector3f pos);
+	void AddShield();
 	void SpawnPowerups();
 	shared_ptr<GameObject> CreateExplosion();
 	
@@ -71,6 +74,10 @@ private:
 	const static uint START_NEXT_LEVEL = 1;
 	const static uint CREATE_NEW_PLAYER = 2;
 	const static uint CREATE_POWERUP = 3;
+	const static uint REMOVE_INVINCIBILITY = 4;
+	const static uint BLINK = 5;
+	const static uint BLINKOFF = 6;
+	const static uint SHIELD_DELAY = 7;
 
 	ScoreKeeper mScoreKeeper;
 	Player mPlayer;

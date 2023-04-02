@@ -145,13 +145,24 @@ void Spaceship::TripleShot(void)
 	mWorld->AddObject(bulletCenter);
 	mWorld->AddObject(bulletRight);
 	mWorld->AddObject(bulletLeft);
-	
+}
+
+void Spaceship::TurnShieldOn(bool s) {
+	mShieldOn = s;
+}
+
+void Spaceship::SetInvincible(bool i) {
+	mInvincible = i;
+}
+
+bool Spaceship::IsInvincible(void) {
+	return mInvincible;
 }
 
 bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
 {
 	// Check if the object collided with is a powerup
-	if (o->GetType() != GameObjectType("Asteroid")) return false;
+	if (o->GetType() != GameObjectType("Asteroid") || mShieldOn) return false;
 	if (mBoundingShape.get() == NULL) return false;
 	if (o->GetBoundingShape().get() == NULL) return false;
 	return mBoundingShape->CollisionTest(o->GetBoundingShape());

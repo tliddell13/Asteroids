@@ -20,6 +20,9 @@ public:
 	virtual void Rotate(float r);
 	virtual void Shoot(void);
 	virtual void TripleShot(void);
+	virtual void TurnShieldOn(bool s);
+	virtual void SetInvincible(bool i);
+	virtual bool IsInvincible(void);
 
 	void SetSpaceshipShape(shared_ptr<Shape> spaceship_shape) { mSpaceshipShape = spaceship_shape; }
 	void SetThrusterShape(shared_ptr<Shape> thruster_shape) { mThrusterShape = thruster_shape; }
@@ -30,6 +33,8 @@ public:
 
 private:
 	float mThrust;
+	bool mShieldOn;
+	bool mInvincible;
 
 	shared_ptr<Shape> mSpaceshipShape;
 	shared_ptr<Shape> mThrusterShape;

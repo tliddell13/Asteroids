@@ -111,6 +111,8 @@
     <ClCompile Include="..\..\SRC\ExtraLife.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\SRC\PointBonus.cpp" />
+    <ClCompile Include="..\..\SRC\Shield.cpp" />
+    <ClCompile Include="..\..\SRC\ShieldPower.cpp" />
     <ClCompile Include="..\..\src\Spaceship.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -125,6 +127,8 @@
     <ClInclude Include="..\..\SRC\Player.h" />
     <ClInclude Include="..\..\SRC\PointBonus.h" />
     <ClInclude Include="..\..\SRC\ScoreKeeper.h" />
+    <ClInclude Include="..\..\SRC\Shield.h" />
+    <ClInclude Include="..\..\SRC\ShieldPower.h" />
     <ClInclude Include="..\..\src\Spaceship.h" />
   </ItemGroup>
   <ItemGroup>
