@@ -12,8 +12,8 @@ public:
 
 	bool CollisionTest(shared_ptr<GameObject> o);
 	void OnCollision(const GameObjectList& objects);
-//private:
-	//shared_ptr<Spaceship> mSpaceship;
+private:
+	shared_ptr<Spaceship> mSpaceship;
 };
 
 #endif

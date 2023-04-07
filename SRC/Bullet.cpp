@@ -45,7 +45,6 @@ void Bullet::Update(int t)
 	}
 
 }
-
 bool Bullet::CollisionTest(shared_ptr<GameObject> o)
 {
 	if (o->GetType() != GameObjectType("Asteroid")) return false;

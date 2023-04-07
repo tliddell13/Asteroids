@@ -3,7 +3,7 @@
 #include "BulletUpgrade.h"
 #include "BoundingShape.h"
 
-// Change random position to not spawn where the player is at
+// Bullet upgrade works just like asteroid and other powerups to spawn in a random position
 BulletUpgrade::BulletUpgrade(void) : GameObject("BulletUpgrade")
 {
 	mAngle = rand() % 360;
@@ -19,19 +19,16 @@ BulletUpgrade::BulletUpgrade(void) : GameObject("BulletUpgrade")
 BulletUpgrade::~BulletUpgrade(void)
 {
 }
-// Checks for the collision of an asteroid
+// Checks for the collision of the bullet upgrade
 bool BulletUpgrade::CollisionTest(shared_ptr<GameObject> o)
 {
-	if (GetType() == o->GetType()) return false;
-	if (mBoundingShape.get() == NULL) return false;
-	if (o->GetBoundingShape().get() == NULL) return false;
 	// Bullet upgrade will ignore everything but bullets and the spaceship
 	if (o->GetType() == GameObjectType("Bullet") || o->GetType() == GameObjectType("Spaceship")) {
 		return mBoundingShape->CollisionTest(o->GetBoundingShape());
 	}
 	else return false;
 }
-// Handles the collision of an asteroid
+// Handles the collision of the bullet upgrade
 void BulletUpgrade::OnCollision(const GameObjectList& objects)
 {
 	mWorld->FlagForRemoval(GetThisPtr());

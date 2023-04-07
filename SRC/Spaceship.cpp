@@ -4,31 +4,37 @@
 #include "Spaceship.h"
 #include "BoundingSphere.h"
 
-using namespace std;
-
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
 /**  Default constructor. */
 Spaceship::Spaceship()
 	: GameObject("Spaceship"), mThrust(0)
 {
+	mInvincible = false;
+	mShieldOn = false;
 }
 
 /** Construct a spaceship with given position, velocity, acceleration, angle, and rotation. */
 Spaceship::Spaceship(GLVector3f p, GLVector3f v, GLVector3f a, GLfloat h, GLfloat r)
 	: GameObject("Spaceship", p, v, a, h, r), mThrust(0)
 {
+	mInvincible = false;
+	mShieldOn = false;
 }
 
 /** Copy constructor. */
 Spaceship::Spaceship(const Spaceship& s)
 	: GameObject(s), mThrust(0)
 {
+	mInvincible = false;
+	mShieldOn = false;
 }
 
 /** Destructor. */
 Spaceship::~Spaceship(void)
 {
+	mInvincible = false;
+	mShieldOn = false;
 }
 
 // PUBLIC INSTANCE METHODS ////////////////////////////////////////////////////
@@ -159,13 +165,22 @@ bool Spaceship::IsInvincible(void) {
 	return mInvincible;
 }
 
+// Collision test for the spaceship
 bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
 {
-	// Check if the object collided with is a powerup
-	if (o->GetType() != GameObjectType("Asteroid") || mShieldOn) return false;
-	if (mBoundingShape.get() == NULL) return false;
-	if (o->GetBoundingShape().get() == NULL) return false;
-	return mBoundingShape->CollisionTest(o->GetBoundingShape());
+	// Check if the collision is fatal
+	if (o->GetType() == GameObjectType("Asteroid") || o->GetType() == GameObjectType("AlienSpaceship") || o->GetType() == GameObjectType("AlienBullet")) {
+		// If there is an error and the shield is on but object still collides with spaceship return false
+		if (!mShieldOn) {
+			return mBoundingShape->CollisionTest(o->GetBoundingShape());
+		}
+		else {
+			return false;
+		}
+	}
+	else {
+		return false;
+	}
 }
 
 void Spaceship::OnCollision(const GameObjectList &objects)

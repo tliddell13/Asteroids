@@ -16,6 +16,7 @@
 #include "BoundingSphere.h"
 #include "GUILabel.h"
 #include "Explosion.h"
+#include "AlienSpaceship.h"
 
 // PUBLIC INSTANCE CONSTRUCTORS ///////////////////////////////////////////////
 
@@ -27,6 +28,8 @@ Asteroids::Asteroids(int argc, char *argv[])
 	mLevel = 1;
 	mAsteroidCount = 0;
 	tripleShot = false;
+	shieldHealth = 0;
+	
 }
 
 /** Destructor. */
@@ -61,24 +64,30 @@ void Asteroids::Start()
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_light);
 	glEnable(GL_LIGHT0);
 
+	// The animations for the project
 	Animation *explosion_anim = AnimationManager::GetInstance().CreateAnimationFromFile("explosion", 64, 1024, 64, 64, "explosion_fs.png");
 	Animation *bigAsteroid_anim = AnimationManager::GetInstance().CreateAnimationFromFile("bigAsteroid", 64, 4096, 64, 64, "bigAsteroid.png");
 	Animation *mediumAsteroid_anim = AnimationManager::GetInstance().CreateAnimationFromFile("mediumAsteroid", 128, 8192, 128, 128, "mediumAsteroid.png");
 	Animation *smallAsteroid_anim = AnimationManager::GetInstance().CreateAnimationFromFile("smallAsteroid", 128, 8192, 128, 128, "smallAsteroid.png");
 	Animation *spaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("spaceship", 128, 128, 128, 128, "spaceship_fs.png");
-	Animation *points_anim = AnimationManager::GetInstance().CreateAnimationFromFile("coin", 128, 128, 128, 128, "coin.png");
+	Animation *points_anim = AnimationManager::GetInstance().CreateAnimationFromFile("coin", 128, 128, 128, 128, "coin2.png");
 	Animation *life_anim = AnimationManager::GetInstance().CreateAnimationFromFile("life", 128, 128, 128, 128, "life.png");
 	Animation *shield_anim = AnimationManager::GetInstance().CreateAnimationFromFile("shield", 128, 128, 128, 128, "shield.png");
-	Animation *bulletPowerup_anim = AnimationManager::GetInstance().CreateAnimationFromFile("bulletPowerup", 128, 128, 128, 128, "bulletPowerup.png");
+	Animation *bulletPowerup_anim = AnimationManager::GetInstance().CreateAnimationFromFile("bulletPowerup", 128, 128, 128, 128, "shieldGreen.png");
 	Animation *greenShield_anim = AnimationManager::GetInstance().CreateAnimationFromFile("shieldGreen", 128, 128, 128, 128, "shieldGreen.png");
 	Animation *yellowShield_anim = AnimationManager::GetInstance().CreateAnimationFromFile("shieldYellow", 128, 128, 128, 128, "shieldYellow.png");
+	Animation* alienSpaceship_anim = AnimationManager::GetInstance().CreateAnimationFromFile("alienSpaceship", 128, 8192, 128, 128, "alienSpaceship.png");
 	// Create a spaceship and add it to the world
 	mGameWorld->AddObject(CreateSpaceship());
 	SetTimer(500, BLINKOFF);
 	// Set invincibility timer for beginning of game to shut off invincibility
 	SetTimer(3000, REMOVE_INVINCIBILITY);
 	// Create some asteroids and add them to the world
-	CreateAsteroids(3);
+	CreateAsteroids(0);
+
+	mGameWorld->AddObject(CreateAlienSpaceship());
+	SetTimer(2000, ALIEN_MOVEMENT);
+	SetTimer(2000, ALIEN_SHOOT);
 
 	// Spawn the powerups 
 	SpawnPowerups();
@@ -169,7 +178,7 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 		explosion->SetRotation(object->GetRotation());
 		mGameWorld->AddObject(explosion);
 		mAsteroidCount--;
-		cout << mAsteroidCount;
+		// When the level is past level 1
 		// If the asteroid is one of the original sized asteroids split it and place 3 more in the same position
 		if (object->GetScale() == 0.5f && mLevel > 1) {
 			SplitAsteroids(2, object->GetPosition());
@@ -225,6 +234,13 @@ void Asteroids::OnTimer(int value)
 		mLevel++;
 		int num_asteroids = 3 + mLevel;
 		CreateAsteroids(num_asteroids);
+		SpawnPowerups();
+		/*
+		if (mLevel == 1) {
+			mGameWorld->AddObject(CreateAlienSpaceship());
+			SetTimer(2000, ALIEN_MOVEMENT);
+		}
+		*/
 	}
 
 	if (value == SHOW_GAME_OVER)
@@ -237,7 +253,7 @@ void Asteroids::OnTimer(int value)
 		srand(time(0));
 		int powerupChoice = rand() % 4 + 1;
 		// Spawn a point bonus
-		if (powerupChoice) {
+		if (powerupChoice == 1) {
 			shared_ptr<GameObject> pointBonus = make_shared<PointBonus>();
 			pointBonus->SetBoundingShape(make_shared<BoundingSphere>(pointBonus->GetThisPtr(), 4.0f));
 			Animation* anim_ptr = AnimationManager::GetInstance().GetAnimationByName("coin");
@@ -248,7 +264,7 @@ void Asteroids::OnTimer(int value)
 			mGameWorld->AddObject(pointBonus);
 		}
 		// Spawn an extra life
-		if (powerupChoice) {
+		if (powerupChoice == 2) {
 			shared_ptr<GameObject> extraLife = make_shared<ExtraLife>();
 			extraLife->SetBoundingShape(make_shared<BoundingSphere>(extraLife->GetThisPtr(), 4.0f));
 			Animation* anim_ptr2 = AnimationManager::GetInstance().GetAnimationByName("life");
@@ -259,7 +275,7 @@ void Asteroids::OnTimer(int value)
 			mGameWorld->AddObject(extraLife);
 		}
 		// Spawn a bullet upgrade
-		if (powerupChoice) {
+		if (powerupChoice == 3) {
 			shared_ptr<GameObject> bulletUpgrade = make_shared<BulletUpgrade>();
 			bulletUpgrade->SetBoundingShape(make_shared<BoundingSphere>(bulletUpgrade->GetThisPtr(), 4.0f));
 			Animation* anim_ptr3 = AnimationManager::GetInstance().GetAnimationByName("bulletPowerup");
@@ -269,8 +285,9 @@ void Asteroids::OnTimer(int value)
 			bulletUpgrade->SetScale(0.07f);
 			mGameWorld->AddObject(bulletUpgrade);
 		}
+		
 		// Spawn a shield upgrade
-		if (powerupChoice) {
+		if (powerupChoice == 4) {
 			shared_ptr<GameObject> shield = make_shared<ShieldPower>();
 			shield->SetBoundingShape(make_shared<BoundingSphere>(shield->GetThisPtr(), 4.0f));
 			Animation* anim_ptr4 = AnimationManager::GetInstance().GetAnimationByName("shield");
@@ -280,11 +297,12 @@ void Asteroids::OnTimer(int value)
 			shield->SetScale(0.07f);
 			mGameWorld->AddObject(shield);
 		}
-
 	} 
+	// Removes the invincibility when the level is starting
 	if (value == REMOVE_INVINCIBILITY) {
 		mSpaceship->SetInvincible(false);
 	}
+	// Makes the spaceship blink at the beginning of the level when it is invincible
 	if (value == BLINK) {
 		mSpaceship->SetSprite(mSpaceship_sprite);
 		if (mSpaceship->IsInvincible()) {
@@ -297,6 +315,21 @@ void Asteroids::OnTimer(int value)
 	}
 	if (value == SHIELD_DELAY) {
 		AddShield();
+	}
+	// The timer to keep the alien spaceship moving
+	if (value == ALIEN_MOVEMENT) {
+		if (mAlienSpaceship->GetThrust() == 0) {
+			mAlienSpaceship->Thrust(10);
+		}
+		else {
+			mAlienSpaceship->Thrust(0);
+		}
+		SetTimer(100, ALIEN_MOVEMENT);
+	}
+	// The timer for the alien shooting
+	if (value == ALIEN_SHOOT) {
+		mAlienSpaceship->Shoot();
+		SetTimer(2000, ALIEN_SHOOT);
 	}
 
 }
@@ -320,6 +353,24 @@ shared_ptr<GameObject> Asteroids::CreateSpaceship()
 	mSpaceship->SetInvincible(true);
 	// Return the spaceship so it can be added to the world
 	return mSpaceship;
+
+}
+
+shared_ptr<GameObject> Asteroids::CreateAlienSpaceship()
+{
+	// Create a raw pointer to a spaceship that can be converted to
+	// shared_ptrs of different types because GameWorld implements IRefCount
+	mAlienSpaceship = make_shared<AlienSpaceship>(mSpaceship);
+	mAlienSpaceship->SetBoundingShape(make_shared<BoundingSphere>(mAlienSpaceship->GetThisPtr(), 4.0f));
+	shared_ptr<Shape> bullet_shape = make_shared<Shape>("alienBullet.shape");
+	mAlienSpaceship->SetBulletShape(bullet_shape);
+	Animation *alienAnim_ptr = AnimationManager::GetInstance().GetAnimationByName("alienSpaceship");
+	mAlienSpaceship_sprite =
+		make_shared<Sprite>(alienAnim_ptr->GetWidth(), alienAnim_ptr->GetHeight(), alienAnim_ptr);
+	mAlienSpaceship->SetSprite(mAlienSpaceship_sprite);
+	mAlienSpaceship->SetScale(0.1f);
+	// Return the spaceship so it can be added to the world
+	return mAlienSpaceship;
 
 }
 
@@ -366,6 +417,7 @@ void Asteroids::SplitAsteroids(const uint num_asteroids, GLVector3f pos)
 		mGameWorld->AddObject(asteroid);
 	}
 }
+// Add a shield to the players spaceship
 void Asteroids::AddShield() {
 	// If shield health is full give the blue shield
 	if (shieldHealth == 3) {
@@ -402,6 +454,7 @@ void Asteroids::AddShield() {
 		mGameWorld->AddObject(shield);
 	}
 	else {
+		// If no more shield hits remaining
 		mSpaceship->TurnShieldOn(false);
 	}
 }
@@ -413,7 +466,7 @@ void Asteroids::SpawnPowerups() {
 	int randomTime1 = rand() % 55001 + 5000;
 	int randomTime2 = rand() % 55001 + 5000;
 	int randomTime3 = rand() % 55001 + 5000;
-	SetTimer(1000, CREATE_POWERUP);
+	SetTimer(randomTime1, CREATE_POWERUP);
 	SetTimer(randomTime2, CREATE_POWERUP);
 	SetTimer(randomTime3, CREATE_POWERUP);
 }

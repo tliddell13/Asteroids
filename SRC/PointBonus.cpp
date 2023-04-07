@@ -3,7 +3,7 @@
 #include "PointBonus.h"
 #include "BoundingShape.h"
 
-// Change random position to not spawn where the player is at
+// Works just like asteroid and other powerups to spawn in a random position
 PointBonus::PointBonus(void) : GameObject("PointBonus")
 {
 	mAngle = rand() % 360;
@@ -22,9 +22,6 @@ PointBonus::~PointBonus(void)
 // Checks for the collision of the bonus
 bool PointBonus::CollisionTest(shared_ptr<GameObject> o)
 {
-	if (GetType() == o->GetType()) return false;
-	if (mBoundingShape.get() == NULL) return false;
-	if (o->GetBoundingShape().get() == NULL) return false;
 	// Point bonus will ignore everything but bullets and the spaceship
 	if (o->GetType() == GameObjectType("Bullet") || o->GetType() == GameObjectType("Spaceship")) {
 		return mBoundingShape->CollisionTest(o->GetBoundingShape());
