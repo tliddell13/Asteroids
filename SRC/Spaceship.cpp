@@ -169,18 +169,12 @@ bool Spaceship::IsInvincible(void) {
 bool Spaceship::CollisionTest(shared_ptr<GameObject> o)
 {
 	// Check if the collision is fatal
+	if (mShieldOn || IsInvincible()) return false;
 	if (o->GetType() == GameObjectType("Asteroid") || o->GetType() == GameObjectType("AlienSpaceship") || o->GetType() == GameObjectType("AlienBullet")) {
 		// If there is an error and the shield is on but object still collides with spaceship return false
-		if (!mShieldOn) {
-			return mBoundingShape->CollisionTest(o->GetBoundingShape());
-		}
-		else {
-			return false;
-		}
+		return mBoundingShape->CollisionTest(o->GetBoundingShape());
 	}
-	else {
-		return false;
-	}
+	return false;
 }
 
 void Spaceship::OnCollision(const GameObjectList &objects)

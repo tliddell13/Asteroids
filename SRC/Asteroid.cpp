@@ -37,15 +37,13 @@ Asteroid::~Asteroid(void)
 }
 // Checks for the collision of an asteroid
 bool Asteroid::CollisionTest(shared_ptr<GameObject> o)
-{
-	// Asteroids will ignore everything but bullets and the spaceship
+{	// Asteroids will ignore everything but bullets and the spaceship
+	// Asteroids are not destroyed when the player is still invincible
+	if (mSpaceship->IsInvincible()) return false;
 	if (o->GetType() == GameObjectType("Bullet") || o->GetType() == GameObjectType("Spaceship") || o->GetType() == GameObjectType("Shield")) {
-		// The asteroids are not destroyed when the player is invincible
-		if (!mSpaceship->IsInvincible()) {
-			return mBoundingShape->CollisionTest(o->GetBoundingShape());
-		}
+		return mBoundingShape->CollisionTest(o->GetBoundingShape());
 	}
-	else return false;
+	return false;
 }
 // Handles the collision of an asteroid
 void Asteroid::OnCollision(const GameObjectList& objects)

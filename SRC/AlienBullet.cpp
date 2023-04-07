@@ -50,7 +50,8 @@ void AlienBullet::Update(int t)
 }
 bool AlienBullet::CollisionTest(shared_ptr<GameObject> o)
 {
-	if (o->GetType() != GameObjectType("Asteroid")) return false;
+	// The alien spaceship is the only thing that will not destroy an alien bullet
+	if (o->GetType() == GameObjectType("AlienSpaceship")) return false;
 	if (mBoundingShape.get() == NULL) return false;
 	if (o->GetBoundingShape().get() == NULL) return false;
 	return mBoundingShape->CollisionTest(o->GetBoundingShape());

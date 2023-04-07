@@ -83,7 +83,7 @@ void Asteroids::Start()
 	// Set invincibility timer for beginning of game to shut off invincibility
 	SetTimer(3000, REMOVE_INVINCIBILITY);
 	// Create some asteroids and add them to the world
-	CreateAsteroids(0);
+	CreateAsteroids(1);
 
 	mGameWorld->AddObject(CreateAlienSpaceship());
 	SetTimer(2000, ALIEN_MOVEMENT);
@@ -119,11 +119,6 @@ void Asteroids::OnKeyPressed(uchar key, int x, int y)
 	switch (key)
 	{
 	case ' ':
-		if (mSpaceship->IsInvincible()) {
-			// Do nothing if the player is invincible
-			// AKA no shooting
-			break;
-		}
 		if (tripleShot) {
 			mSpaceship->TripleShot();
 		}
@@ -193,7 +188,7 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 			// Make player invincible for four seconds and start next level in two seconds
 			SetTimer(500, BLINKOFF);
 			mSpaceship->SetInvincible(true);
-			SetTimer(4000, REMOVE_INVINCIBILITY);
+			SetTimer(3000, REMOVE_INVINCIBILITY);
 			SetTimer(2000, START_NEXT_LEVEL); 
 
 		}
@@ -215,7 +210,7 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 	{
 		shieldHealth--;
 		// Delay the addition of a new shield so it isn't immediatedly deleted
-		SetTimer(500, SHIELD_DELAY);
+		AddShield();
 	}
 }
 
@@ -287,7 +282,7 @@ void Asteroids::OnTimer(int value)
 		}
 		
 		// Spawn a shield upgrade
-		if (powerupChoice == 4) {
+		if (powerupChoice) {
 			shared_ptr<GameObject> shield = make_shared<ShieldPower>();
 			shield->SetBoundingShape(make_shared<BoundingSphere>(shield->GetThisPtr(), 4.0f));
 			Animation* anim_ptr4 = AnimationManager::GetInstance().GetAnimationByName("shield");
@@ -420,14 +415,14 @@ void Asteroids::SplitAsteroids(const uint num_asteroids, GLVector3f pos)
 // Add a shield to the players spaceship
 void Asteroids::AddShield() {
 	// If shield health is full give the blue shield
-	if (shieldHealth == 3) {
+	if (shieldHealth >= 3) {
 		shared_ptr<GameObject> shield = make_shared<Shield>(mSpaceship);
 		shield->SetBoundingShape(make_shared<BoundingSphere>(shield->GetThisPtr(), 18.0f));
 		Animation* anim_ptr = AnimationManager::GetInstance().GetAnimationByName("shield");
 		shared_ptr<Sprite> shields_sprite
 			= make_shared<Sprite>(anim_ptr->GetWidth(), anim_ptr->GetHeight(), anim_ptr);
 		shield->SetSprite(shields_sprite);
-		shield->SetScale(0.3f);
+		shield->SetScale(0.2f);
 		mGameWorld->AddObject(shield);
 		mSpaceship->TurnShieldOn(true);
 	}
@@ -439,7 +434,7 @@ void Asteroids::AddShield() {
 		shared_ptr<Sprite> shields_sprite
 			= make_shared<Sprite>(anim_ptr->GetWidth(), anim_ptr->GetHeight(), anim_ptr);
 		shield->SetSprite(shields_sprite);
-		shield->SetScale(0.3f);
+		shield->SetScale(0.2f);
 		mGameWorld->AddObject(shield);
 	}
 	// If this is the second hit give a yellow shield
@@ -450,8 +445,8 @@ void Asteroids::AddShield() {
 		shared_ptr<Sprite> shields_sprite
 			= make_shared<Sprite>(anim_ptr->GetWidth(), anim_ptr->GetHeight(), anim_ptr);
 		shield->SetSprite(shields_sprite);
-		shield->SetScale(0.3f);
-		mGameWorld->AddObject(shield);
+		shield->SetScale(0.2f);
+ 		mGameWorld->AddObject(shield);
 	}
 	else {
 		// If no more shield hits remaining
@@ -545,6 +540,10 @@ void Asteroids::OnPlayerKilled(int lives_left)
 	if (lives_left > 0) 
 	{ 
 		SetTimer(1000, CREATE_NEW_PLAYER); 
+		SetTimer(500, BLINKOFF);
+		mSpaceship->SetInvincible(true);
+		// Set invincibility timer for beginning of game to shut off invincibility
+		SetTimer(3000, REMOVE_INVINCIBILITY);
 	}
 	else
 	{
