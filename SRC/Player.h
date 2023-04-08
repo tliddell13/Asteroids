@@ -24,6 +24,11 @@ public:
 			mLives -= 1;
 			FirePlayerKilled();
 		}
+		//If the player destroys one of the life bonuses
+		if (object->GetType() == GameObjectType("ExtraLife")) {
+			mLives += 1;
+			FireLivesChanged();
+		}
 	}
 
 	void AddListener(shared_ptr<IPlayerListener> listener)
@@ -37,6 +42,13 @@ public:
 		for (PlayerListenerList::iterator lit = mListeners.begin();
 			lit != mListeners.end(); ++lit) {
 			(*lit)->OnPlayerKilled(mLives);
+		}
+	}
+	void FireLivesChanged()
+	{
+		for (PlayerListenerList::iterator lit = mListeners.begin();
+			lit != mListeners.end(); ++lit) {
+			(*lit)->OnLivesChanged(mLives);
 		}
 	}
 

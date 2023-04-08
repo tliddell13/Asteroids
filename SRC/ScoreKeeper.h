@@ -23,6 +23,11 @@ public:
  			mScore += 10;
 			FireScoreChanged();
 		}
+		// If the point bonus is destroyed award the extra points
+		if (object->GetType() == GameObjectType("PointBonus")) {
+			mScore += 50;
+			FireScoreChanged();
+		}
 	}
 
 	void AddListener(shared_ptr<IScoreListener> listener)

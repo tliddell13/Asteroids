@@ -9,6 +9,7 @@
 #include "ScoreKeeper.h"
 #include "Player.h"
 #include "IPlayerListener.h"
+#include "AlienSpaceship.h"
 
 class GameObject;
 class Spaceship;
@@ -34,6 +35,8 @@ public:
 
 	void OnScoreChanged(int score);
 
+	void OnLivesChanged(int lives);
+
 	// Declaration of the IPlayerLister interface //////////////////////////////
 
 	void OnPlayerKilled(int lives_left);
@@ -49,23 +52,38 @@ public:
 
 private:
 	shared_ptr<Spaceship> mSpaceship;
+	shared_ptr<AlienSpaceship> mAlienSpaceship;
 	shared_ptr<GUILabel> mScoreLabel;
 	shared_ptr<GUILabel> mLivesLabel;
 	shared_ptr<GUILabel> mGameOverLabel;
+	shared_ptr<Sprite> mSpaceship_sprite;
+	shared_ptr<Sprite> mAlienSpaceship_sprite;
 
 	uint mLevel;
 	uint mAsteroidCount;
+	bool tripleShot;
+	int shieldHealth;
 
 	void ResetSpaceship();
 	shared_ptr<GameObject> CreateSpaceship();
+	shared_ptr<GameObject> CreateAlienSpaceship();
 	void CreateGUI();
 	void CreateAsteroids(const uint num_asteroids);
 	void SplitAsteroids(const uint num_asteroids, GLVector3f pos);
+	void AddShield();
+	void SpawnPowerups();
 	shared_ptr<GameObject> CreateExplosion();
 	
 	const static uint SHOW_GAME_OVER = 0;
 	const static uint START_NEXT_LEVEL = 1;
 	const static uint CREATE_NEW_PLAYER = 2;
+	const static uint CREATE_POWERUP = 3;
+	const static uint REMOVE_INVINCIBILITY = 4;
+	const static uint BLINK = 5;
+	const static uint BLINKOFF = 6;
+	const static uint SHIELD_DELAY = 7;
+	const static uint ALIEN_MOVEMENT = 8;
+	const static uint ALIEN_SHOOT = 9;
 
 	ScoreKeeper mScoreKeeper;
 	Player mPlayer;
