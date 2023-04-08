@@ -22,6 +22,9 @@ private:
 
 	shared_ptr<Spaceship> mSpaceship;
 	shared_ptr<Shape> mBulletShape;
+protected:
+	// Don't know why but it needs to be here
+	bool mEvade;
 };
 
 #endif

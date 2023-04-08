@@ -83,11 +83,7 @@ void Asteroids::Start()
 	// Set invincibility timer for beginning of game to shut off invincibility
 	SetTimer(3000, REMOVE_INVINCIBILITY);
 	// Create some asteroids and add them to the world
-	CreateAsteroids(1);
-
-	mGameWorld->AddObject(CreateAlienSpaceship());
-	SetTimer(2000, ALIEN_MOVEMENT);
-	SetTimer(2000, ALIEN_SHOOT);
+	CreateAsteroids(2);
 
 	// Spawn the powerups 
 	SpawnPowerups();
@@ -202,8 +198,10 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 	if (object->GetType() == GameObjectType("ShieldPower"))
 	{
 		// Keeps track of this shields health
-		shieldHealth = 3;
-		AddShield();
+		if (shieldHealth == 0) {
+			shieldHealth = 3;
+			AddShield();
+		}
 	}
 	// Add a new shield if there is any shield health remaining
 	if (object->GetType() == GameObjectType("Shield"))
@@ -211,6 +209,14 @@ void Asteroids::OnObjectRemoved(GameWorld* world, shared_ptr<GameObject> object)
 		shieldHealth--;
 		// Delay the addition of a new shield so it isn't immediatedly deleted
 		AddShield();
+	}
+	// Add an explosion for alien spaceship
+	if (object->GetType() == GameObjectType("AlienSpaceship"))
+	{
+		shared_ptr<GameObject> explosion = CreateExplosion();
+		explosion->SetPosition(mAlienSpaceship->GetPosition());
+		explosion->SetRotation(mAlienSpaceship->GetRotation());
+		mGameWorld->AddObject(explosion);
 	}
 }
 
@@ -227,15 +233,16 @@ void Asteroids::OnTimer(int value)
 	if (value == START_NEXT_LEVEL)
 	{
 		mLevel++;
-		int num_asteroids = 3 + mLevel;
+		int num_asteroids = 2 + mLevel;
 		CreateAsteroids(num_asteroids);
 		SpawnPowerups();
-		/*
-		if (mLevel == 1) {
+		
+		if (mLevel > 1) {
 			mGameWorld->AddObject(CreateAlienSpaceship());
 			SetTimer(2000, ALIEN_MOVEMENT);
+			SetTimer(2000, ALIEN_SHOOT);
 		}
-		*/
+		
 	}
 
 	if (value == SHOW_GAME_OVER)
@@ -246,6 +253,9 @@ void Asteroids::OnTimer(int value)
 	if (value == CREATE_POWERUP)
 	{
 		srand(time(0));
+
+		// Don't spawn shield or bullet upgrades if the player already has them
+		
 		int powerupChoice = rand() % 4 + 1;
 		// Spawn a point bonus
 		if (powerupChoice == 1) {
@@ -282,7 +292,7 @@ void Asteroids::OnTimer(int value)
 		}
 		
 		// Spawn a shield upgrade
-		if (powerupChoice) {
+		if (powerupChoice == 4) {
 			shared_ptr<GameObject> shield = make_shared<ShieldPower>();
 			shield->SetBoundingShape(make_shared<BoundingSphere>(shield->GetThisPtr(), 4.0f));
 			Animation* anim_ptr4 = AnimationManager::GetInstance().GetAnimationByName("shield");
@@ -314,7 +324,7 @@ void Asteroids::OnTimer(int value)
 	// The timer to keep the alien spaceship moving
 	if (value == ALIEN_MOVEMENT) {
 		if (mAlienSpaceship->GetThrust() == 0) {
-			mAlienSpaceship->Thrust(10);
+			mAlienSpaceship->Thrust(8);
 		}
 		else {
 			mAlienSpaceship->Thrust(0);
@@ -457,10 +467,10 @@ void Asteroids::AddShield() {
 void Asteroids::SpawnPowerups() {
 	// Seed the random number gen
 	srand(time(NULL));
-	// Pick random times to spawn three powerups in between the times of 5 seconds and 60 seconds
-	int randomTime1 = rand() % 55001 + 5000;
-	int randomTime2 = rand() % 55001 + 5000;
-	int randomTime3 = rand() % 55001 + 5000;
+	// Pick random times to spawn three powerups in between the times of 5 seconds and 25 seconds
+	int randomTime1 = rand() % 25001 + 5000;
+	int randomTime2 = rand() % 25001 + 5000;
+	int randomTime3 = rand() % 25001 + 5000;
 	SetTimer(randomTime1, CREATE_POWERUP);
 	SetTimer(randomTime2, CREATE_POWERUP);
 	SetTimer(randomTime3, CREATE_POWERUP);

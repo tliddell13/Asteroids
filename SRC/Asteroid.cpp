@@ -15,13 +15,13 @@ Asteroid::Asteroid(shared_ptr<Spaceship> spaceship) : GameObject("Asteroid"), mS
 	mAngle = rand() % 360;
 	mRotation = 0; // rand() % 90;
 	double x = rand() / 2;
-	// Keep picking until x does not equal within 10 units  of spaceship's x
-	while (abs(x - spaceship->GetPosition().x) < 10) {
+	// Keep picking until x does not equal within 20 units  of spaceship's x
+	while (abs(x - spaceship->GetPosition().x) < 20) {
 		x = rand() / static_cast<double>(2);
 	}
 	double y = rand() / 2;
-	// keep picking until y does not equal within 10 units of spaceship's y
-	while (abs(y - spaceship->GetPosition().y) < 10) {
+	// keep picking until y does not equal within 20 units of spaceship's y
+	while (abs(y - spaceship->GetPosition().y) < 20) {
 		y = rand() / static_cast<double>(2);
 	}
 	mPosition.x = x;
@@ -39,7 +39,7 @@ Asteroid::~Asteroid(void)
 bool Asteroid::CollisionTest(shared_ptr<GameObject> o)
 {	// Asteroids will ignore everything but bullets and the spaceship
 	// Asteroids are not destroyed when the player is still invincible
-	if (mSpaceship->IsInvincible()) return false;
+	if (mSpaceship->IsInvincible() && o->GetType() == GameObjectType("Spaceship")) return false;
 	if (o->GetType() == GameObjectType("Bullet") || o->GetType() == GameObjectType("Spaceship") || o->GetType() == GameObjectType("Shield")) {
 		return mBoundingShape->CollisionTest(o->GetBoundingShape());
 	}
